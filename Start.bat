@@ -55,8 +55,11 @@ if errorlevel 1 (
 
     call :colorText "1;33" "   [*] Downloading Node.js installer..."
     timeout /t 1 >nul
-    powershell -Command "Invoke-WebRequest -Uri 'https://nodejs.org/dist/v22.16.0/node-v22.16.0-x64.msi' -OutFile 'node-v22.16.0-x64.msi'"
-    if exist node-v22.16.0-x64.msi (
+    set "tempDir=%TEMP%\kyvrixon development"
+    if not exist "%tempDir%" mkdir "%tempDir%"
+    call powershell -Command "Invoke-WebRequest -Uri 'https://nodejs.org/dist/v22.16.0/node-v22.16.0-x64.msi' -OutFile '%tempDir%\node-v22.16.0-x64.msi'"
+    
+    if exist "%tempDir%\node-v22.16.0-x64.msi" (
         call :colorText "1;33" "   [*] Running Node.js installer..."
         timeout /t 1 >nul
         start /wait msiexec /i node-v22.16.0-x64.msi
@@ -66,6 +69,8 @@ if errorlevel 1 (
         exit
     ) else (
         call :colorText "1;31" "   [*] Failed to download Node.js installer."
+        timeout /t 1 >nul
+        call :colorText "1;31" "   [*] Please download it manually from https://nodejs.org/dist/v22.16.0/node-v22.16.0-x64.msi"
         pause
         exit /b
     )
@@ -74,7 +79,7 @@ if errorlevel 1 (
 cls
 call %divider%
 call :colorText "1;37" "   |----------------------------------------------|"
-call :colorText "1;31" "   |   CLI Password Manager - Alpha build v0.0.1  |"
+call :colorText "1;31" "   |   CLI Password Manager - Alpha build v0.0.5  |"
 call :colorText "1;37" "   |----------------------------------------------|"
 call %divider%
 
