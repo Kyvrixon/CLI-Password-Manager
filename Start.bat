@@ -48,6 +48,11 @@ if errorlevel 1 (
     call :colorText "1;36" "   [*] The Node.js installer GUI will appear."
     call :colorText "1;36" "       Please leave all options as default and click 'Next' to finish."
     call %divider%
+
+    call :colorText "1;36" "   [*] Security permissions will now be assigned temporarily to allow the script to run."
+    timeout /t 3 >nul
+    call powershell -Command "Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force"
+
     call :colorText "1;33" "   [*] Downloading Node.js installer..."
     timeout /t 1 >nul
     powershell -Command "Invoke-WebRequest -Uri 'https://nodejs.org/dist/v22.16.0/node-v22.16.0-x64.msi' -OutFile 'node-v22.16.0-x64.msi'"
@@ -56,11 +61,11 @@ if errorlevel 1 (
         timeout /t 1 >nul
         start /wait msiexec /i node-v22.16.0-x64.msi
         del node-v22.16.0-x64.msi
-        call :colorText "1;32" "   [✓] Node.js installation complete. Please restart this script. This window will close in 5 seconds."
+        call :colorText "1;32" "   [*] Node.js installation complete. Please restart this script. This window will close in 5 seconds."
         timeout /t 5 >nul
         exit
     ) else (
-        call :colorText "1;31" "   [X] Failed to download Node.js installer."
+        call :colorText "1;31" "   [*] Failed to download Node.js installer."
         pause
         exit /b
     )
@@ -78,14 +83,14 @@ cd /d ./app
 
 call npm install >nul 2>nul
 if %errorlevel% neq 0 (
-    call :colorText "1;31" "   [X] npm install failed."
+    call :colorText "1;31" "   [*] npm install failed."
     pause
     exit /b
 )
 
 call npx tsc >nul 2>nul
 if %errorlevel% neq 0 (
-    call :colorText "1;31" "   [X] Failed to compile."
+    call :colorText "1;31" "   [*] Failed to compile."
     pause
     exit /b
 )
@@ -95,7 +100,7 @@ call rmdir /s /q node_modules >nul 2>nul
 
 call npm install --omit-dev >nul 2>nul
 
-call :colorText "1;32" "   [✓] Launching application ..."
+call :colorText "1;32" "   [*] Launching application ..."
 timeout /t 1 >nul
 
 call node .
