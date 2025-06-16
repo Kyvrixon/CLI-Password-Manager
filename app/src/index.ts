@@ -16,11 +16,11 @@ const subtitle =
 
 const separator = gray("──────────────────────────────────────────────");
 
+
 process.stdout.write("\x1b]0;🔐 Password Manager\x07");
 console.clear();
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-const mastercodeLocation = path.resolve(homedir(), "code.txt");
 
 process.on("uncaughtException", (error) => {
 	console.log(error.name);
@@ -62,6 +62,28 @@ async function onboarding() {
 	);
 	globalThis.db = new Database(dbPath, { create: true });
 	let existingdata = await db.read<UserData>("creds");
+
+	// Version check
+	try {
+		const localPkgPath = path.join(__dirname, "..", "package.json");
+		const localPkg = JSON.parse(await fs.promises.readFile(localPkgPath, "utf8"));
+		const localVersion = localPkg.version;
+
+		const res = await fetch("https://raw.githubusercontent.com/Kyvrixon/CLI-Password-Manager/main/package.json");
+		if (res.ok) {
+			const remotePkg = await res.json();
+			const remoteVersion = remotePkg.version;
+			if (localVersion !== remoteVersion) {
+				console.log(yellow(`\n✨ A new version is available!`));
+				console.log(gray(`Your version: ${localVersion}`));
+				console.log(green(`Latest version: ${remoteVersion}`));
+				console.log(`Visit ${cyan("https://github.com/Kyvrixon/CLI-Password-Manager")} to update.\n`);
+			}
+		}
+	} catch (e) {
+		console.log(gray("⚠️ Could not check for latest version. Please check your internet connection."));
+	}
+
 	spinner.stop();
 
 	if (!existingdata) {
