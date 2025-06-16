@@ -38,9 +38,9 @@ goto :main
 where node >nul 2>nul
 if errorlevel 1 (
     call %divider%
-    call :colorText "1;37" "    |----------------------------------------------|"
-    call :colorText "1;31"  "   |        ! Node.js is not installed.           |"
-    call :colorText "1;37"  "   |----------------------------------------------|"
+    call :colorText "1;37" "   |----------------------------------------------|"
+    call :colorText "1;31" "   |           Node.js is not installed.          |"
+    call :colorText "1;37" "   |----------------------------------------------|"
     call %divider%
     call :colorText "1;33" "   [*] Node.js will now be installed automatically."
     call %divider%
@@ -61,8 +61,8 @@ if errorlevel 1 (
     if exist "%TEMP%\node-v22.16.0-x64.msi" (
         call :colorText "1;33" "   [*] Running Node.js installer..."
         timeout /t 1 >nul
-        start /wait msiexec /i node-v22.16.0-x64.msi
-        del node-v22.16.0-x64.msi
+        start /wait msiexec /i "%TEMP%\node-v22.16.0-x64.msi"
+        del "%TEMP%\node-v22.16.0-x64.msi"
         call :colorText "1;32" "   [*] Node.js installation complete. Please restart this script. This window will close in 5 seconds."
         timeout /t 5 >nul
         exit
@@ -83,7 +83,7 @@ call :colorText "1;37" "   |----------------------------------------------|"
 call %divider%
 
 call :colorText "1;33" "   [*] Starting application ..."
-cd /d ./app
+cd /d app
 
 call npm install >nul 2>nul
 if %errorlevel% neq 0 (
