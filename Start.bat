@@ -55,11 +55,10 @@ if errorlevel 1 (
 
     call :colorText "1;33" "   [*] Downloading Node.js installer..."
     timeout /t 1 >nul
-    set "desktopDir=%USERPROFILE%\Desktop"
-    if not exist "%desktopDir%" mkdir "%desktopDir%"
-    call powershell -Command "Invoke-WebRequest -Uri 'https://nodejs.org/dist/v22.16.0/node-v22.16.0-x64.msi' -OutFile '%desktopDir%\node-v22.16.0-x64.msi'"
+
+    call powershell -Command "Invoke-WebRequest -Uri 'https://nodejs.org/dist/v22.16.0/node-v22.16.0-x64.msi' -OutFile '%TEMP%\node-v22.16.0-x64.msi'"
     
-    if exist "%desktopDir%\node-v22.16.0-x64.msi" (
+    if exist "%TEMP%\node-v22.16.0-x64.msi" (
         call :colorText "1;33" "   [*] Running Node.js installer..."
         timeout /t 1 >nul
         start /wait msiexec /i node-v22.16.0-x64.msi
