@@ -5,7 +5,7 @@
 	"author": "Kyvrixon",
 	"main": "./dist/src/index.js",
 	"dependencies": {
-		"@inquirer/prompts": "^7.5.3",
+		"@inquirer/prompts": "^7.6.0",
 		"@kyvrixon/encryptor": "^1.4.0",
 		"@kyvrixon/json-db": "^0.0.1",
 		"colorette": "^2.0.20",
