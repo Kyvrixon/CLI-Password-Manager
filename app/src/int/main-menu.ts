@@ -2,25 +2,28 @@ import * as y from "@inquirer/prompts";
 import fs from "fs";
 import path from "path";
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 // UI helpers
+const cyan = (msg: string) => `\x1b[38;5;39m${msg}\x1b[0m`;
+const blue = (msg: string) => `\x1b[38;5;33m${msg}\x1b[0m`;
+const gray = (msg: string) => `\x1b[38;5;245m${msg}\x1b[0m`;
+
 const printSection = (msg: string) => {
-	console.log("\n\x1b[38;5;33m%s\x1b[0m", `╭─ ${msg} `);
+	console.log(`\n${blue("╭" + "─".repeat(2) + " " + msg)}`);
 };
 
+const printDivider = () => {
+	console.log(gray("├" + "─".repeat(30)));
+};
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+//TODO: Add edit action
 const menuActions = [
 	{
 		value: "view-all",
-		name: "View all",
+		name: "View",
 		description: "View all of your saved passwords.",
 		file: "./actions/view-all.js",
-	},
-	{
-		value: "view-one",
-		name: "View one",
-		description: "View a password.",
-		file: "./actions/view-one.js",
 	},
 	{
 		value: "create",
@@ -37,7 +40,6 @@ const menuActions = [
 ];
 
 function getDirname(importUrl: string) {
-	// Handles both Windows and Unix paths
 	return path.dirname(
 		decodeURIComponent(new URL(importUrl).pathname).replace(
 			/^\/([a-zA-Z]:)/,
@@ -46,12 +48,8 @@ function getDirname(importUrl: string) {
 	);
 }
 
-export const mainmenu = async () => {
-	console.clear();
-
-	const dirname = getDirname(import.meta.url);
-
-	const menuWithStatus = await Promise.all(
+async function getMenuWithStatus(dirname: string) {
+	return Promise.all(
 		menuActions.map(async (item) => {
 			const filePath = path.resolve(dirname, item.file);
 			let exists = false;
@@ -64,22 +62,28 @@ export const mainmenu = async () => {
 			return {
 				...item,
 				disabled: !exists,
-				description: !exists ? "Coming soon" : item.description,
+				description: !exists ? gray("Coming soon") : item.description,
 			};
 		}),
 	);
+}
 
-	spinner.stop();
+export const mainmenu = async () => {
+	console.clear();
+
+	const dirname = getDirname(import.meta.url);
+	const menuWithStatus = await getMenuWithStatus(dirname);
 
 	printSection("Main Menu");
+	printDivider();
 
 	const action = await y
 		.select({
-			message: "\x1b[38;5;39mWhat would you like to do?\x1b[0m",
+			message: cyan("What would you like to do?"),
 			loop: true,
 			choices: menuWithStatus.map((item) => ({
 				value: item.value,
-				name: `${item.name}`,
+				name: item.disabled ? gray(item.name) : item.name,
 				description: item.description,
 				disabled: item.disabled,
 			})),
