@@ -1,0 +1,46 @@
+{
+	"name": "kyvrixon-password-manager",
+	"version": "0.1.0-beta.1",
+	"author": "Kyvrixon",
+	"description": "A secure CLI password manager with encryption and intuitive interface",
+	"main": "./dist/src/index.js",
+	"dependencies": {
+		"@inquirer/prompts": "^7.8.0",
+		"@kyvrixon/encryptor": "^1.5.2",
+		"@kyvrixon/json-db": "^1.0.2",
+		"colorette": "^2.0.20",
+		"ora": "^8.2.0"
+	},
+	"peerDependencies": {
+		"typescript": "^5.9.2"
+	},
+	"devDependencies": {
+		"@types/bun": "^1.2.19",
+		"@types/node": "^22.0.0",
+		"prettier": "^3.6.2",
+		"tsx": "^4.20.3"
+	},
+	"scripts": {
+		"format": "bun prettier --write --log-level=warn .",
+		"start": "bun src/index.ts",
+		"dev": "bun --watch src/index.ts",
+		"build": "bun build src/index.ts --outdir dist --target node",
+		"compile:win-x64": "bun build --compile --minify --sourcemap --target=bun-windows-x64-modern ./src/index.ts --outfile builds/ky-pwd-mngr-windows-x64.exe",
+		"compile:linux-x64": "bun build --compile --minify --sourcemap --target=bun-linux-x64-modern ./src/index.ts --outfile builds/ky-pwd-mngr-linux-x64",
+		"compile:mac-x64": "bun build --compile --minify --sourcemap --target=bun-darwin-x64-modern ./src/index.ts --outfile builds/ky-pwd-mngr-darwin-x64",
+		"compile:mac-arm64": "bun build --compile --minify --sourcemap --target=bun-darwin-arm64-modern ./src/index.ts --outfile builds/ky-pwd-mngr-darwin-arm64",
+		"compile:linux-arm64": "bun build --compile --minify --sourcemap --target=bun-linux-arm64-modern ./src/index.ts --outfile builds/ky-pwd-mngr-linux-arm64",
+		"compile:linux-x64-musl": "bun build --compile --minify --sourcemap --target=bun-linux-x64-musl-modern ./src/index.ts --outfile builds/ky-pwd-mngr-linux-x64-musl",
+		"compile:linux-arm64-musl": "bun build --compile --minify --sourcemap --target=bun-linux-arm64-musl-modern ./src/index.ts --outfile builds/ky-pwd-mngr-linux-arm64-musl",
+		"compile:all": "bun run compile:win-x64 && bun run compile:linux-x64 && bun run compile:mac-x64 && bun run compile:mac-arm64 && bun run compile:linux-arm64 && bun run compile:linux-x64-musl && bun run compile:linux-arm64-musl"
+	},
+	"type": "module",
+	"keywords": [
+		"password-manager",
+		"cli",
+		"security",
+		"encryption",
+		"terminal"
+	],
+	"license": "MIT"
+}
