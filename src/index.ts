@@ -13,18 +13,20 @@ const APP_NAME = "Kyvrixon CLI Password Manager";
 
 // Global Ctrl+C handler for emergency fallback to main menu
 function setupGlobalSignalHandlers() {
-	process.on('SIGINT', () => {
-		console.log(colors.warning("\n\n🔄 Ctrl+C detected - Force exiting to main menu..."));
-		
+	process.on("SIGINT", () => {
+		console.log(
+			colors.warning("\n\n🔄 Ctrl+C detected - Force exiting to main menu..."),
+		);
+
 		// Force clear all input streams
 		if (process.stdin) {
 			process.stdin.pause();
 			process.stdin.removeAllListeners();
 		}
-		
+
 		// Clear screen
-		process.stdout.write('\x1B[2J\x1B[H');
-		
+		process.stdout.write("\x1B[2J\x1B[H");
+
 		// Force exit and restart
 		console.log(colors.muted("Application will restart...\n"));
 		setTimeout(() => {
@@ -32,7 +34,7 @@ function setupGlobalSignalHandlers() {
 		}, 500);
 	});
 
-	process.on('SIGTERM', async () => {
+	process.on("SIGTERM", async () => {
 		console.log(colors.muted("\n\n👋 Application terminated. Stay secure."));
 		process.exit(0);
 	});
@@ -48,12 +50,14 @@ async function checkForUpdates() {
 
 		const res = await fetch(
 			"https://api.github.com/repos/Kyvrixon/CLI-Password-Manager/releases/latest",
-			{ headers: { "Accept": "application/vnd.github.v3+json" } }
+			{ headers: { Accept: "application/vnd.github.v3+json" } },
 		);
 
 		if (res.ok) {
-			const release = await res.json() as { tag_name: string };
-			const remoteVersion = release.tag_name.startsWith("v") ? release.tag_name.slice(1) : release.tag_name;
+			const release = (await res.json()) as { tag_name: string };
+			const remoteVersion = release.tag_name.startsWith("v")
+				? release.tag_name.slice(1)
+				: release.tag_name;
 
 			if (localVersion !== remoteVersion) {
 				ui.space();
@@ -61,7 +65,9 @@ async function checkForUpdates() {
 				console.log(colors.warning("✨  A new version is available!"));
 				console.log(colors.muted(`   Current: ${localVersion}`));
 				console.log(colors.success_bold(`   Latest: ${remoteVersion}`));
-				console.log(`   Visit ${colors.primary("https://github.com/Kyvrixon/CLI-Password-Manager/releases")} to update.`);
+				console.log(
+					`   Visit ${colors.primary("https://github.com/Kyvrixon/CLI-Password-Manager/releases")} to update.`,
+				);
 				ui.divider("━", 50, colors.muted);
 				ui.space();
 				await delay(2000);
@@ -69,7 +75,9 @@ async function checkForUpdates() {
 		}
 	} catch (error) {
 		console.log(
-			colors.muted("⚠️  Could not check for updates. Internet connection may be unavailable."),
+			colors.muted(
+				"⚠️  Could not check for updates. Internet connection may be unavailable.",
+			),
 		);
 		await delay(1000);
 	}
@@ -83,7 +91,7 @@ async function initializeDatabase() {
 		"data",
 	);
 
-	globalThis.db = new Database(dbPath, { 
+	globalThis.db = new Database(dbPath, {
 		createDirectory: true,
 	});
 
@@ -92,13 +100,13 @@ async function initializeDatabase() {
 
 async function setupNewUser(): Promise<UserData> {
 	ui.header("Welcome Setup", "Let's secure your digital life!");
-	
+
 	// Welcome message
 	console.log(colors.brand("╔" + "═".repeat(48) + "╗"));
 	console.log(
 		colors.brand("║") +
-		colors.success_bold("   ✨ Welcome to Password Manager! ✨     ") +
-		colors.brand("║"),
+			colors.success_bold("   ✨ Welcome to Password Manager! ✨     ") +
+			colors.brand("║"),
 	);
 	console.log(colors.brand("╚" + "═".repeat(48) + "╝"));
 
@@ -111,7 +119,11 @@ async function setupNewUser(): Promise<UserData> {
 	console.log(colors.warning("🔐 Security Information:"));
 	console.log(colors.muted("   • Your master code is never stored anywhere"));
 	console.log(colors.muted("   • All passwords are encrypted with AES-256"));
-	console.log(colors.muted("   • If you forget your master code, data cannot be recovered"));
+	console.log(
+		colors.muted(
+			"   • If you forget your master code, data cannot be recovered",
+		),
+	);
 	ui.space();
 	await delay(2000);
 
@@ -139,14 +151,21 @@ async function setupNewUser(): Promise<UserData> {
 
 	do {
 		console.log(colors.secondary("🔑 Step 2: Master Code"));
-		console.log(colors.muted("   This code protects all your passwords (minimum 6 characters)"));
-		
+		console.log(
+			colors.muted(
+				"   This code protects all your passwords (minimum 6 characters)",
+			),
+		);
+
 		mastercode = await y.password({
 			message: colors.primary("Create master code:"),
 			validate: (value: string) => {
-				if (value.length < 6) return "Master code must be at least 6 characters";
-				if (value.length > 128) return "Master code must be less than 128 characters";
-				if (value.trim() !== value) return "Master code cannot start or end with spaces";
+				if (value.length < 6)
+					return "Master code must be at least 6 characters";
+				if (value.length > 128)
+					return "Master code must be less than 128 characters";
+				if (value.trim() !== value)
+					return "Master code cannot start or end with spaces";
 				return true;
 			},
 		});
@@ -155,15 +174,19 @@ async function setupNewUser(): Promise<UserData> {
 		const strength = utils.analyzePasswordStrength(mastercode);
 		const strengthColors = {
 			"very-weak": colors.danger,
-			"weak": colors.warning,
-			"fair": colors.warning,
-			"good": colors.success,
-			"strong": colors.success_bold,
+			weak: colors.warning,
+			fair: colors.warning,
+			good: colors.success,
+			strong: colors.success_bold,
 		};
-		
-		console.log(`   Strength: ${strengthColors[strength.level](strength.level.toUpperCase())}`);
+
+		console.log(
+			`   Strength: ${strengthColors[strength.level](strength.level.toUpperCase())}`,
+		);
 		if (strength.feedback.length > 0) {
-			console.log(colors.muted("   Suggestions: " + strength.feedback.join(", ")));
+			console.log(
+				colors.muted("   Suggestions: " + strength.feedback.join(", ")),
+			);
 		}
 		ui.space();
 
@@ -176,14 +199,16 @@ async function setupNewUser(): Promise<UserData> {
 			confirmed = true;
 			console.log(colors.success("✅ Master codes match!"));
 		} else {
-			console.log(colors.warning("❌ Master codes don't match. Please try again."));
+			console.log(
+				colors.warning("❌ Master codes don't match. Please try again."),
+			);
 			ui.space();
 			await delay(1000);
 		}
 	} while (!confirmed);
 
 	ui.space();
-	
+
 	// Create user data
 	const userData: UserData = {
 		name: username.trim(),
@@ -199,7 +224,7 @@ async function setupNewUser(): Promise<UserData> {
 	// Save to database
 	spinner.start("Creating your secure vault...");
 	await delay(1500);
-	
+
 	try {
 		await db.write("users", "creds", userData);
 		spinner.succeed("Vault created successfully!");
@@ -210,24 +235,30 @@ async function setupNewUser(): Promise<UserData> {
 	}
 
 	ui.space();
-	
+
 	// Summary
 	console.log(colors.highlight("🎉 Setup Complete!"));
 	ui.divider("─", 30, colors.muted);
 	console.log(`   Name: ${colors.primary(userData.name)}`);
-	console.log(`   Created: ${colors.muted(utils.formatDate(userData.createdAt))}`);
+	console.log(
+		`   Created: ${colors.muted(utils.formatDate(userData.createdAt))}`,
+	);
 	console.log(`   Security: ${colors.success("AES-256 Encryption")}`);
 	ui.divider("─", 30, colors.muted);
 	ui.space();
-	
+
 	await delay(2000);
 	return userData;
 }
 
 async function authenticateUser(userData: UserData): Promise<boolean> {
 	ui.header("Authentication", `Welcome back, ${userData.name}!`);
-	
-	console.log(colors.muted(`Last login: ${userData.lastLogin ? utils.formatDate(userData.lastLogin) : "First time"}`));
+
+	console.log(
+		colors.muted(
+			`Last login: ${userData.lastLogin ? utils.formatDate(userData.lastLogin) : "First time"}`,
+		),
+	);
 	ui.space();
 
 	let attempts = 0;
@@ -242,7 +273,7 @@ async function authenticateUser(userData: UserData): Promise<boolean> {
 			// Update last login
 			userData.lastLogin = utils.timestamp();
 			await db.write("users", "creds", userData);
-			
+
 			console.log(colors.success("✅ Authentication successful!"));
 			await delay(500);
 			return true;
@@ -250,12 +281,18 @@ async function authenticateUser(userData: UserData): Promise<boolean> {
 
 		attempts++;
 		const remaining = maxAttempts - attempts;
-		
+
 		if (remaining > 0) {
-			console.log(colors.warning(`❌ Incorrect master code. ${remaining} attempt${remaining > 1 ? 's' : ''} remaining.`));
+			console.log(
+				colors.warning(
+					`❌ Incorrect master code. ${remaining} attempt${remaining > 1 ? "s" : ""} remaining.`,
+				),
+			);
 			await delay(1000);
 		} else {
-			console.log(colors.error("❌ Too many failed attempts. Exiting for security."));
+			console.log(
+				colors.error("❌ Too many failed attempts. Exiting for security."),
+			);
 			await delay(2000);
 			return false;
 		}
@@ -266,7 +303,7 @@ async function authenticateUser(userData: UserData): Promise<boolean> {
 
 async function onboarding() {
 	console.clear();
-	
+
 	// Show app header
 	ui.header(APP_NAME, `Version ${APP_VERSION}`);
 
@@ -280,10 +317,10 @@ async function onboarding() {
 	try {
 		// Initialize database
 		const existingData = await initializeDatabase();
-		
+
 		// Check for updates
 		await checkForUpdates();
-		
+
 		spinner.stop();
 
 		let userData: UserData;
@@ -295,7 +332,7 @@ async function onboarding() {
 			// Existing user authentication
 			userData = existingData;
 			const authenticated = await authenticateUser(userData);
-			
+
 			if (!authenticated) {
 				console.log(colors.error("Authentication failed. Goodbye!"));
 				process.exit(1);
@@ -318,7 +355,6 @@ async function onboarding() {
 
 		// Launch main menu
 		await mainmenu();
-
 	} catch (error) {
 		spinner.fail("Initialization failed");
 		await errorHandler.handle(error as Error, "application startup");

@@ -1,17 +1,18 @@
-import { 
-	blue, 
-	green, 
-	yellow, 
-	red, 
-	cyan, 
-	gray, 
-	bold, 
+import {
+	blue,
+	green,
+	yellow,
+	red,
+	cyan,
+	gray,
+	bold,
 	dim,
-	magenta 
+	magenta,
 } from "colorette";
 import crypto from "crypto";
 
-export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+export const delay = (ms: number) =>
+	new Promise((resolve) => setTimeout(resolve, ms));
 
 // Enhanced color utilities with consistent theming
 export const colors = {
@@ -25,7 +26,7 @@ export const colors = {
 	text: (str: string) => str,
 	bold,
 	dim,
-	
+
 	// Semantic colors
 	brand: (str: string) => bold(cyan(str)),
 	highlight: (str: string) => bold(blue(str)),
@@ -57,14 +58,18 @@ export const ui = {
 		const padding = Math.max(0, width - title.length - 4);
 		const leftPad = Math.floor(padding / 2);
 		const rightPad = padding - leftPad;
-		
-		console.log(colors.primary(
-			ui.box.topLeft + 
-			ui.box.horizontal.repeat(leftPad + 1) + 
-			" " + title + " " + 
-			ui.box.horizontal.repeat(rightPad + 1) + 
-			ui.box.topRight
-		));
+
+		console.log(
+			colors.primary(
+				ui.box.topLeft +
+					ui.box.horizontal.repeat(leftPad + 1) +
+					" " +
+					title +
+					" " +
+					ui.box.horizontal.repeat(rightPad + 1) +
+					ui.box.topRight,
+			),
+		);
 	},
 
 	// Dividers
@@ -120,20 +125,27 @@ export const utils = {
 	// Format date for display
 	formatDate: (dateString: string): string => {
 		const date = new Date(dateString);
-		return date.toLocaleDateString() + " " + date.toLocaleTimeString([], { 
-			hour: '2-digit', 
-			minute: '2-digit' 
-		});
+		return (
+			date.toLocaleDateString() +
+			" " +
+			date.toLocaleTimeString([], {
+				hour: "2-digit",
+				minute: "2-digit",
+			})
+		);
 	},
 
 	// Generate secure password
-	generatePassword: (length: number = 16, options: {
-		includeUppercase?: boolean;
-		includeLowercase?: boolean;
-		includeNumbers?: boolean;
-		includeSymbols?: boolean;
-		excludeSimilar?: boolean;
-	} = {}): string => {
+	generatePassword: (
+		length: number = 16,
+		options: {
+			includeUppercase?: boolean;
+			includeLowercase?: boolean;
+			includeNumbers?: boolean;
+			includeSymbols?: boolean;
+			excludeSimilar?: boolean;
+		} = {},
+	): string => {
 		const {
 			includeUppercase = true,
 			includeLowercase = true,
@@ -143,12 +155,16 @@ export const utils = {
 		} = options;
 
 		let charset = "";
-		
+
 		if (includeUppercase) {
-			charset += excludeSimilar ? "ABCDEFGHJKLMNPQRSTUVWXYZ" : "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+			charset += excludeSimilar
+				? "ABCDEFGHJKLMNPQRSTUVWXYZ"
+				: "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 		}
 		if (includeLowercase) {
-			charset += excludeSimilar ? "abcdefghjkmnpqrstuvwxyz" : "abcdefghijklmnopqrstuvwxyz";
+			charset += excludeSimilar
+				? "abcdefghjkmnpqrstuvwxyz"
+				: "abcdefghijklmnopqrstuvwxyz";
 		}
 		if (includeNumbers) {
 			charset += excludeSimilar ? "23456789" : "0123456789";
@@ -177,7 +193,7 @@ export const utils = {
 		const hasLowercase = /[a-z]/.test(password);
 		const hasNumbers = /\d/.test(password);
 		const hasSymbols = /[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(password);
-		
+
 		let score = 0;
 		const feedback: string[] = [];
 
@@ -189,13 +205,13 @@ export const utils = {
 		// Character variety scoring
 		if (hasUppercase) score += 1;
 		else feedback.push("Add uppercase letters");
-		
+
 		if (hasLowercase) score += 1;
 		else feedback.push("Add lowercase letters");
-		
+
 		if (hasNumbers) score += 1;
 		else feedback.push("Add numbers");
-		
+
 		if (hasSymbols) score += 1;
 		else feedback.push("Add symbols");
 
@@ -204,7 +220,7 @@ export const utils = {
 			score -= 1;
 			feedback.push("Avoid repeated characters");
 		}
-		
+
 		if (/123|abc|qwe/i.test(password)) {
 			score -= 1;
 			feedback.push("Avoid common sequences");
@@ -253,14 +269,20 @@ export const utils = {
 
 	// Calculate vault statistics
 	calculateVaultStats: (passwords: PasswordData): VaultStats => {
-		const categories = [...new Set(passwords.map(p => p.category).filter((cat): cat is string => Boolean(cat)))];
-		
+		const categories = [
+			...new Set(
+				passwords
+					.map((p) => p.category)
+					.filter((cat): cat is string => Boolean(cat)),
+			),
+		];
+
 		let strongPasswords = 0;
 		let weakPasswords = 0;
 		const passwordValues = new Set<string>();
 		let duplicatePasswords = 0;
 
-		passwords.forEach(password => {
+		passwords.forEach((password) => {
 			// Note: We can't analyze encrypted passwords directly
 			// This would need to be done when passwords are decrypted
 			if (passwordValues.has(password.value)) {
@@ -285,7 +307,7 @@ export const errorHandler = {
 	// Graceful error handling with user-friendly messages
 	handle: async (error: Error, context: string = "operation") => {
 		console.error(colors.error(`\n❌ Error during ${context}:`));
-		
+
 		if (error.message.includes("ENOENT")) {
 			console.error(colors.muted("   File or directory not found"));
 		} else if (error.message.includes("EACCES")) {
@@ -295,7 +317,7 @@ export const errorHandler = {
 		} else {
 			console.error(colors.muted(`   ${error.message}`));
 		}
-		
+
 		ui.space();
 		await delay(2000);
 	},

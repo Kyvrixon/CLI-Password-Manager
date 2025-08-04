@@ -1,36 +1,44 @@
-import { mainmenu } from "../main-menu.js";
 import * as y from "@inquirer/prompts";
-import { colors, ui, utils, delay, errorHandler } from "../../utils/index.js";
+import { colors, delay, errorHandler, ui, utils } from "../../utils/index.js";
 
 export default async function editPassword(): Promise<void> {
 	try {
 		ui.header("Edit Password", "Modify an existing password entry");
 
 		spinner.start("Loading your password vault...");
-		const existingData = await db.read<PasswordData>("vault", "passwords") || [];
+		const existingData =
+			(await db.read<PasswordData>("vault", "passwords")) || [];
 		spinner.stop();
 
 		if (existingData.length === 0) {
 			ui.status.warning("Your vault is empty!");
 			ui.space();
-			console.log(colors.muted("💡 Use the 'Add Password' option to create your first entry"));
+			console.log(
+				colors.muted(
+					"💡 Use the 'Add Password' option to create your first entry",
+				),
+			);
 			await delay(2500);
-			return; // Return to main menu
+			return;
 		}
 
 		ui.space();
 		console.log(colors.primary("📝 Select a password to edit:"));
 		ui.space();
 
-		// Enhanced password selection
 		const selectedPasswordId = await y.search({
 			message: colors.primary("Search for password to edit:"),
 			source: async (input) => {
 				const filtered = input
-					? existingData.filter((pwd) =>
-							pwd.nickname.toLowerCase().includes(input.toLowerCase()) ||
-							(pwd.description && pwd.description.toLowerCase().includes(input.toLowerCase())) ||
-							(pwd.username && pwd.username.toLowerCase().includes(input.toLowerCase()))
+					? existingData.filter(
+							(pwd) =>
+								pwd.nickname.toLowerCase().includes(input.toLowerCase()) ||
+								(pwd.description &&
+									pwd.description
+										.toLowerCase()
+										.includes(input.toLowerCase())) ||
+								(pwd.username &&
+									pwd.username.toLowerCase().includes(input.toLowerCase())),
 						)
 					: existingData;
 
@@ -42,7 +50,9 @@ export default async function editPassword(): Promise<void> {
 							pwd.description,
 							pwd.username && `👤 ${pwd.username}`,
 							pwd.category && `📁 ${pwd.category}`,
-						].filter(Boolean).join(" • ")
+						]
+							.filter(Boolean)
+							.join(" • "),
 					),
 				}));
 			},
@@ -50,24 +60,27 @@ export default async function editPassword(): Promise<void> {
 			validate: (value) => !!value || "Please select a password to edit",
 		});
 
-		const passwordIndex = existingData.findIndex(pwd => pwd.id === selectedPasswordId);
+		const passwordIndex = existingData.findIndex(
+			(pwd) => pwd.id === selectedPasswordId,
+		);
 		if (passwordIndex === -1) {
 			ui.status.error("Password not found");
 			await delay(1500);
-			return; // Return to main menu
+			return;
 		}
 
 		const currentPassword = existingData[passwordIndex];
 		if (!currentPassword) {
 			ui.status.error("Password not found");
 			await delay(1500);
-			return; // Return to main menu
+			return;
 		}
 
-		// Master code verification
 		ui.space();
 		console.log(colors.warning("🔐 Authentication required to edit password"));
-		console.log(colors.muted(`   Editing: ${colors.highlight(currentPassword.nickname)}`));
+		console.log(
+			colors.muted(`   Editing: ${colors.highlight(currentPassword.nickname)}`),
+		);
 		ui.space();
 
 		let authenticated = false;
@@ -85,24 +98,30 @@ export default async function editPassword(): Promise<void> {
 				attempts++;
 				const remaining = maxAttempts - attempts;
 				if (remaining > 0) {
-					console.log(colors.warning(`❌ Incorrect code. ${remaining} attempt${remaining > 1 ? 's' : ''} remaining.`));
+					console.log(
+						colors.warning(
+							`❌ Incorrect code. ${remaining} attempt${remaining > 1 ? "s" : ""} remaining.`,
+						),
+					);
 					await delay(1000);
 				}
 			}
 		}
 
 		if (!authenticated) {
-			console.log(colors.error("❌ Too many failed attempts. Returning to main menu."));
+			console.log(
+				colors.error("❌ Too many failed attempts. Returning to main menu."),
+			);
 			await delay(2000);
-			return; // Return to main menu
+			return;
 		}
 
-		// Show current values and collect new ones
 		ui.space();
-		console.log(colors.highlight("📋 Current values (press Enter to keep unchanged):"));
+		console.log(
+			colors.highlight("📋 Current values (press Enter to keep unchanged):"),
+		);
 		ui.space();
 
-		// Edit nickname
 		const nickname = await y.input({
 			message: colors.primary("🏷️  Nickname:"),
 			default: currentPassword.nickname,
@@ -110,12 +129,13 @@ export default async function editPassword(): Promise<void> {
 				const trimmed = value.trim();
 				if (!trimmed) return "Nickname is required";
 				if (trimmed.length < 2) return "Nickname must be at least 2 characters";
-				if (trimmed.length > 50) return "Nickname must be less than 50 characters";
-				
-				// Check for duplicates (excluding current password)
-				const existing = existingData.find((pwd, idx) => 
-					idx !== passwordIndex && 
-					pwd.nickname.toLowerCase() === trimmed.toLowerCase()
+				if (trimmed.length > 50)
+					return "Nickname must be less than 50 characters";
+
+				const existing = existingData.find(
+					(pwd, idx) =>
+						idx !== passwordIndex &&
+						pwd.nickname.toLowerCase() === trimmed.toLowerCase(),
 				);
 				if (existing) {
 					return "This nickname already exists. Please choose a different one.";
@@ -124,7 +144,6 @@ export default async function editPassword(): Promise<void> {
 			},
 		});
 
-		// Edit username
 		const username = await y.input({
 			message: colors.primary("👤 Username/Email:"),
 			default: currentPassword.username || "",
@@ -137,14 +156,13 @@ export default async function editPassword(): Promise<void> {
 			},
 		});
 
-		// Password change option
 		const changePassword = await y.confirm({
 			message: colors.primary("🔒 Change password?"),
 			default: false,
 		});
 
-		let newPassword = currentPassword.value; // Keep encrypted value by default
-		
+		let newPassword = currentPassword.value;
+
 		if (changePassword) {
 			const passwordChoice = await y.select({
 				message: colors.primary("How would you like to set the new password?"),
@@ -163,14 +181,14 @@ export default async function editPassword(): Promise<void> {
 			let plaintextPassword: string;
 
 			if (passwordChoice === "generate") {
-				// Generate new password
 				const length = await y.number({
 					message: colors.primary("Password length:"),
 					default: 16,
 					min: 8,
 					max: 128,
 					validate: (value) => {
-						if (value === undefined || value === null) return "Please enter a valid number";
+						if (value === undefined || value === null)
+							return "Please enter a valid number";
 						if (value < 8) return "Password must be at least 8 characters";
 						if (value > 128) return "Password must be less than 128 characters";
 						return true;
@@ -191,7 +209,7 @@ export default async function editPassword(): Promise<void> {
 				});
 
 				console.log(`   Generated: ${colors.highlight(plaintextPassword)}`);
-				
+
 				const accept = await y.confirm({
 					message: colors.primary("Use this password?"),
 					default: true,
@@ -199,9 +217,8 @@ export default async function editPassword(): Promise<void> {
 
 				if (!accept) {
 					console.log(colors.muted("Password not changed"));
-					plaintextPassword = ""; // Will skip encryption
+					plaintextPassword = "";
 				}
-
 			} else {
 				// Manual password entry
 				plaintextPassword = await y.password({
@@ -221,17 +238,16 @@ export default async function editPassword(): Promise<void> {
 				} catch (error) {
 					spinner.fail("Failed to encrypt password");
 					await errorHandler.handle(error as Error, "password encryption");
-					return; // Return to main menu
+					return;
 				}
 			}
 		}
 
-		// Edit URL
 		const url = await y.input({
 			message: colors.primary("🔗 Website URL:"),
 			default: currentPassword.url || "",
 			validate: (value) => {
-				if (!value.trim()) return true; // Optional field
+				if (!value.trim()) return true;
 				if (!utils.isValidUrl(value)) {
 					return "Please enter a valid URL (including http:// or https://)";
 				}
@@ -239,39 +255,41 @@ export default async function editPassword(): Promise<void> {
 			},
 		});
 
-		// Edit description
 		const description = await y.input({
 			message: colors.primary("📝 Description:"),
 			default: currentPassword.description,
 			validate: (value) => {
 				const trimmed = value.trim();
 				if (!trimmed) return "Description is required";
-				if (trimmed.length < 3) return "Description must be at least 3 characters";
-				if (trimmed.length > 200) return "Description must be less than 200 characters";
+				if (trimmed.length < 3)
+					return "Description must be at least 3 characters";
+				if (trimmed.length > 200)
+					return "Description must be less than 200 characters";
 				return true;
 			},
 		});
 
-		// Edit category
 		const category = await y.input({
 			message: colors.primary("📁 Category:"),
 			default: currentPassword.category || "",
 			validate: (value) => {
-				if (!value.trim()) return true; // Optional field
-				if (value.length > 30) return "Category must be less than 30 characters";
+				if (!value.trim()) return true;
+				if (value.length > 30)
+					return "Category must be less than 30 characters";
 				return true;
 			},
 		});
 
-		// Edit tags
-		const currentTags = currentPassword.tags ? currentPassword.tags.join(", ") : "";
+		const currentTags = currentPassword.tags
+			? currentPassword.tags.join(", ")
+			: "";
 		const tagsInput = await y.input({
 			message: colors.primary("🏷️  Tags (comma-separated):"),
 			default: currentTags,
 			validate: (value) => {
-				if (!value.trim()) return true; // Optional field
-				const tags = value.split(",").map(tag => tag.trim());
-				if (tags.some(tag => tag.length > 20)) {
+				if (!value.trim()) return true;
+				const tags = value.split(",").map((tag) => tag.trim());
+				if (tags.some((tag) => tag.length > 20)) {
 					return "Each tag must be less than 20 characters";
 				}
 				if (tags.length > 10) {
@@ -281,17 +299,18 @@ export default async function editPassword(): Promise<void> {
 			},
 		});
 
-		const tags = tagsInput.trim() ? 
-			tagsInput.split(",").map(tag => tag.trim()).filter(tag => tag.length > 0) : 
-			undefined;
+		const tags = tagsInput.trim()
+			? tagsInput
+					.split(",")
+					.map((tag) => tag.trim())
+					.filter((tag) => tag.length > 0)
+			: undefined;
 
-		// Edit favorite status
 		const favorite = await y.confirm({
 			message: colors.primary("⭐ Mark as favorite?"),
 			default: currentPassword.favorite || false,
 		});
 
-		// Summary of changes
 		ui.space();
 		console.log(colors.highlight("📋 Updated password details:"));
 		ui.divider("─", 30, colors.muted);
@@ -305,7 +324,8 @@ export default async function editPassword(): Promise<void> {
 		if (url.trim()) console.log(`   URL: ${colors.primary(url)}`);
 		console.log(`   Description: ${colors.text(description)}`);
 		if (category.trim()) console.log(`   Category: ${colors.text(category)}`);
-		if (tags && tags.length > 0) console.log(`   Tags: ${colors.text(tags.join(", "))}`);
+		if (tags && tags.length > 0)
+			console.log(`   Tags: ${colors.text(tags.join(", "))}`);
 		if (favorite) console.log(`   ${colors.warning("⭐ Favorite")}`);
 		ui.divider("─", 30, colors.muted);
 		ui.space();
@@ -318,10 +338,9 @@ export default async function editPassword(): Promise<void> {
 		if (!confirmSave) {
 			console.log(colors.muted("💭 Changes not saved"));
 			await delay(1000);
-			return; // Return to main menu
+			return;
 		}
 
-		// Save changes
 		spinner.start("Saving changes...");
 
 		try {
@@ -342,22 +361,25 @@ export default async function editPassword(): Promise<void> {
 			await db.write("vault", "passwords", existingData);
 
 			spinner.succeed("Password updated successfully!");
-			
+
 			ui.space();
 			console.log(colors.success_bold("🎉 Password updated successfully!"));
 			console.log(colors.muted(`   Modified "${nickname}"`));
 			ui.space();
-			
-			await delay(2000);
 
+			await delay(2000);
 		} catch (error) {
 			spinner.fail("Failed to save changes");
 			await errorHandler.handle(error as Error, "password update");
 		}
-
 	} catch (error) {
-		if (error && typeof error === 'object' && 'message' in error && 
-			typeof error.message === 'string' && error.message.includes("User forced exit")) {
+		if (
+			error &&
+			typeof error === "object" &&
+			"message" in error &&
+			typeof error.message === "string" &&
+			error.message.includes("User forced exit")
+		) {
 			console.log(colors.muted("\n👋 Returning to main menu..."));
 			await delay(500);
 		} else {

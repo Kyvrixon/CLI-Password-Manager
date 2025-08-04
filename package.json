@@ -35,12 +35,6 @@
 		"compile:all": "bun run compile:win-x64 && bun run compile:linux-x64 && bun run compile:mac-x64 && bun run compile:mac-arm64 && bun run compile:linux-arm64 && bun run compile:linux-x64-musl && bun run compile:linux-arm64-musl"
 	},
 	"type": "module",
-	"keywords": [
-		"password-manager",
-		"cli",
-		"security",
-		"encryption",
-		"terminal"
-	],
+	"keywords": ["password-manager", "cli", "security", "encryption", "terminal"],
 	"license": "MIT"
 }
