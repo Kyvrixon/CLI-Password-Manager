@@ -1,6 +1,6 @@
 {
 	"name": "kyvrixon-password-manager",
-	"version": "0.1.0-beta.1",
+	"version": "0.1.0-beta.2",
 	"author": "Kyvrixon",
 	"description": "A secure CLI password manager with encryption and intuitive interface",
 	"main": "./dist/src/index.js",
