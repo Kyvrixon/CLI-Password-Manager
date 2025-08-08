@@ -6,7 +6,7 @@
       "dependencies": {
         "@inquirer/prompts": "^7.8.0",
         "@kyvrixon/encryptor": "^1.5.2",
-        "@kyvrixon/json-db": "^1.0.2",
+        "@kyvrixon/json-db": "^1.2.0",
         "colorette": "^2.0.20",
         "ora": "^8.2.0",
       },
@@ -104,7 +104,7 @@
 
     "@kyvrixon/encryptor": ["@kyvrixon/encryptor@1.5.2", "", { "peerDependencies": { "typescript": "^5.9.2" } }, "sha512-TrchO05zUJ+tfaDN5GOz1cjsjgxpeF+G9MK8IoUWcs7/duPb/MVXHL8TWQDf+QUoW0KjxL3YRjphCsiTsuSEgA=="],
 
-    "@kyvrixon/json-db": ["@kyvrixon/json-db@1.0.2", "", { "dependencies": { "zod": "^4.0.14" }, "peerDependencies": { "typescript": "^5.9.2" } }, "sha512-ILEDdVfM47Wkwo2rUJMg8LVLFYc1abuELJ+m6iEpSNmbjizacGLAIe+HzBb1cKB+gOaY0zpvZu3akfP/X+vpWA=="],
+    "@kyvrixon/json-db": ["@kyvrixon/json-db@1.2.0", "", { "dependencies": { "zod": "^4.0.14" }, "peerDependencies": { "typescript": "^5.9.2" } }, "sha512-+Ny6Xk+VE1DwpV4SuylIqqTiOpBiTV5nwFJTscc4EKw0CQng1Vz4rbuLgbMeyMKVrzxChx6IzXXcHmwWoWOd0A=="],
 
     "@types/bun": ["@types/bun@1.2.19", "", { "dependencies": { "bun-types": "1.2.19" } }, "sha512-d9ZCmrH3CJ2uYKXQIUuZ/pUnTqIvLDS0SK7pFmbx8ma+ziH/FRMoAq5bYpRG7y+w1gl+HgyNZbtqgMq4W4e2Lg=="],
 

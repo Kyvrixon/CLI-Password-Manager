@@ -7,7 +7,7 @@
 	"dependencies": {
 		"@inquirer/prompts": "^7.8.0",
 		"@kyvrixon/encryptor": "^1.5.2",
-		"@kyvrixon/json-db": "^1.0.2",
+		"@kyvrixon/json-db": "^1.2.0",
 		"colorette": "^2.0.20",
 		"ora": "^8.2.0"
 	},
